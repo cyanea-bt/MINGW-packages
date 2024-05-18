@@ -1,0 +1,46 @@
+From 3dfd5243c7d8146ff25de4cd76657641118821be Mon Sep 17 00:00:00 2001
+From: Biswapriyo Nath <nathbappai@gmail.com>
+Date: Tue, 30 May 2023 01:53:57 +0530
+Subject: [PATCH] smartcard: Fix compiling for Windows platform
+
+This fixes the following compiler error while targeting Windows platform.
+
+../../server/smartcard.cpp:20:10: fatal error: arpa/inet.h: No such file or directory
+   20 | #include <arpa/inet.h>
+      |          ^~~~~~~~~~~~~
+
+Signed-off-by: Biswapriyo Nath <nathbappai@gmail.com>
+Acked-by: Frediano Ziglio <freddy77@gmail.com>
+---
+ AUTHORS              | 1 +
+ server/smartcard.cpp | 2 ++
+ 2 files changed, 3 insertions(+)
+
+diff --git a/AUTHORS b/AUTHORS
+index 6ad10e6ed..a735d24d2 100644
+--- a/AUTHORS
++++ b/AUTHORS
+@@ -88,5 +88,6 @@ Patches also contributed by
+     Geoffrey McRae <geoff@hostfission.com>
+     Antonio Larrosa <antonio.larrosa@gmail.com>
+     Volker Rümelin <vr_qemu@t-online.de>
++    Biswapriyo Nath <nathbappai@gmail.com>
+ 
+    ....send patches to get your name here...
+diff --git a/server/smartcard.cpp b/server/smartcard.cpp
+index 709815a08..023cf5234 100644
+--- a/server/smartcard.cpp
++++ b/server/smartcard.cpp
+@@ -17,7 +17,9 @@
+ */
+ #include <config.h>
+ 
++#ifndef _WIN32
+ #include <arpa/inet.h>
++#endif
+ #ifdef USE_SMARTCARD
+ #include <libcacard.h>
+ #endif
+-- 
+GitLab
+

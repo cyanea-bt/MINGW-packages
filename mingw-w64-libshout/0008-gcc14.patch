@@ -1,0 +1,33 @@
+--- libshout-2.4.6-orig/src/common/timing/timing.c	2021-09-14 16:26:17.000000000 +0200
++++ libshout-2.4.6/src/common/timing/timing.c	2024-05-17 21:42:41.713532200 +0200
+@@ -60,6 +60,8 @@
+ 
+ #include "timing.h"
+ 
++int __cdecl gettimeofday (struct timeval *p, void *z);
++
+ /* see timing.h for an explanation of _mangle() */
+ 
+ /* 
+@@ -86,10 +88,11 @@
+ 
+ void timing_sleep(uint64_t sleeptime)
+ {
++#ifndef WIN32
+     struct timeval sleeper;
+-
+     sleeper.tv_sec = sleeptime / 1000;
+     sleeper.tv_usec = (sleeptime % 1000) * 1000;
++#endif
+ 
+     /* NOTE:
+      * This should be 0 for the first argument.  The linux manpage
+@@ -97,7 +100,7 @@
+      * value.  If you think differerntly, please provide references.
+      */
+ #ifdef WIN32
+-	Sleep(sleeptime);
++    Sleep(sleeptime);
+ #else
+     select(1, NULL, NULL, NULL, &sleeper);
+ #endif
