@@ -8,6 +8,7 @@
 *.tgz
 *.zip
 *.rar
+*.7z
 *.sig
 *.asc
 *.log
