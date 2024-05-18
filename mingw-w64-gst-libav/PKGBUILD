@@ -1,0 +1,49 @@
+# Maintainer: AlexWMF <alexxwmf@gmail.com>
+
+_realname=gst-libav
+pkgbase=mingw-w64-${_realname}
+pkgname="${MINGW_PACKAGE_PREFIX}-${_realname}"
+pkgver=1.24.3
+pkgrel=1
+pkgdesc="Multimedia graph framework - libav plugin (mingw-w64)"
+arch=('any')
+mingw_arch=('mingw64' 'ucrt64' 'clang64' 'clangarm64')
+url="https://gstreamer.freedesktop.org/"
+license=("LGPL")
+makedepends=("${MINGW_PACKAGE_PREFIX}-cc"
+             "${MINGW_PACKAGE_PREFIX}-meson"
+             "${MINGW_PACKAGE_PREFIX}-ninja"
+             "${MINGW_PACKAGE_PREFIX}-pkgconf"
+             "${MINGW_PACKAGE_PREFIX}-gobject-introspection"
+             "${MINGW_PACKAGE_PREFIX}-gtk-doc"
+             "${MINGW_PACKAGE_PREFIX}-nasm")
+depends=("${MINGW_PACKAGE_PREFIX}-gst-plugins-base"
+         "${MINGW_PACKAGE_PREFIX}-ffmpeg")
+source=("${url}/src/${_realname}/${_realname}-${pkgver}.tar.xz"{,.asc})
+sha256sums=('d9c5b152468a45c1fa8351410422090a7192707ad74d2e1a4367f5254e188d91'
+            'SKIP')
+validpgpkeys=('D637032E45B8C6585B9456565D2EEE6F6F349D7C') # Tim Müller <tim@gstreamer-foundation.org>
+
+build() {
+  mkdir -p "${srcdir}/build-${MSYSTEM}" && cd "${srcdir}/build-${MSYSTEM}"
+
+  MSYS2_ARG_CONV_EXCL="--prefix=" \
+  ${MINGW_PREFIX}/bin/meson.exe setup \
+    --prefix="${MINGW_PREFIX}" \
+    --buildtype plain \
+    --wrap-mode=nofallback \
+    -Dauto_features=enabled \
+    -Dpackage-origin='https://www.msys2.org' \
+    -Ddoc=disabled \
+    ../${_realname}-${pkgver}
+
+  ${MINGW_PREFIX}/bin/ninja.exe
+}
+
+package() {
+  cd "${srcdir}/build-${MSYSTEM}"
+
+  DESTDIR="${pkgdir}" ${MINGW_PREFIX}/bin/ninja.exe install
+
+  rm -f ${pkgdir}${MINGW_PREFIX}/lib/gstreamer*/*.a
+}
