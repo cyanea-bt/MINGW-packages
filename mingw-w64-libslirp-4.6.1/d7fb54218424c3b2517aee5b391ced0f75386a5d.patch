@@ -1,0 +1,41 @@
+From d7fb54218424c3b2517aee5b391ced0f75386a5d Mon Sep 17 00:00:00 2001
+From: Samuel Thibault <samuel.thibault@ens-lyon.org>
+Date: Mon, 21 Jun 2021 08:38:32 +0200
+Subject: [PATCH] dhcp: Always send DHCP_OPT_LEN bytes in options
+
+RFC2131 suggests that the options field may be at least 312 bytes.
+Some DHCP clients seem to assume that it has to be at least 312 bytes.
+
+Fixes #51
+Fixes: f13cad45b25d92760bb0ad67bec0300a4d7d5275 ("bootp: limit
+vendor-specific area to input packet memory buffer")
+
+Signed-off-by: Samuel Thibault <samuel.thibault@ens-lyon.org>
+---
+ src/bootp.c | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/src/bootp.c b/src/bootp.c
+index 0a35873..d78d61b 100644
+--- a/src/bootp.c
++++ b/src/bootp.c
+@@ -355,13 +355,13 @@ static void bootp_reply(Slirp *slirp,
+         q += sizeof(nak_msg) - 1;
+     }
+     assert(q < end);
+-    *q = RFC1533_END;
++    *q++ = RFC1533_END;
+ 
+     daddr.sin_addr.s_addr = 0xffffffffu;
+ 
+-    assert ((q - rbp->bp_vend + 1) <= DHCP_OPT_LEN);
++    assert(q <= end);
+ 
+-    m->m_len = sizeof(struct bootp_t) + (q - rbp->bp_vend + 1) - sizeof(struct ip) - sizeof(struct udphdr);
++    m->m_len = sizeof(struct bootp_t) + (end - rbp->bp_vend) - sizeof(struct ip) - sizeof(struct udphdr);
+     udp_output(NULL, m, &saddr, &daddr, IPTOS_LOWDELAY);
+ }
+ 
+-- 
+GitLab
+

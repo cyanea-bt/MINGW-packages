@@ -1,0 +1,61 @@
+From 84b276c5abb13f4770b046b0efca2cb574ef6d02 Mon Sep 17 00:00:00 2001
+From: Paolo Bonzini <pbonzini@redhat.com>
+Date: Wed, 4 May 2022 23:54:29 +0200
+Subject: [PATCH] win32: declare some local functions as static
+
+These functions do not have a prototype and are not meant to be public.
+Declare them as static.
+
+Signed-off-by: Paolo Bonzini <pbonzini@redhat.com>
+---
+ src/slirp.c     | 6 +++---
+ test/pingtest.c | 2 +-
+ 2 files changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/src/slirp.c b/src/slirp.c
+index 1423b01..04bce41 100644
+--- a/src/slirp.c
++++ b/src/slirp.c
+@@ -139,7 +139,7 @@ int get_dns_addr(struct in_addr *pdns_addr)
+     return 0;
+ }
+ 
+-int is_site_local_dns_broadcast(struct in6_addr *address)
++static int is_site_local_dns_broadcast(struct in6_addr *address)
+ {
+     int i;
+     for (i = 0; i < G_N_ELEMENTS(SITE_LOCAL_DNS_BROADCAST_ADDRS); i++) {
+@@ -150,7 +150,7 @@ int is_site_local_dns_broadcast(struct in6_addr *address)
+     return 0;
+ }
+ 
+-void print_dns_v6_address(struct in6_addr address)
++static void print_dns_v6_address(struct in6_addr address)
+ {
+     char address_str[INET6_ADDRSTRLEN] = "";
+     if (inet_ntop(AF_INET6, &address, address_str, INET6_ADDRSTRLEN)
+@@ -166,7 +166,7 @@ void print_dns_v6_address(struct in6_addr address)
+ // are on deprecated addresses and not generally expected
+ // to work. Further details at:
+ // https://www.ietf.org/proceedings/52/I-D/draft-ietf-ipngwg-dns-discovery-03.txt
+-int get_ipv6_dns_server(struct in6_addr *dns_server_address, uint32_t *scope_id)
++static int get_ipv6_dns_server(struct in6_addr *dns_server_address, uint32_t *scope_id)
+ {
+     PIP_ADAPTER_ADDRESSES addresses = NULL;
+     PIP_ADAPTER_ADDRESSES address = NULL;
+diff --git a/test/pingtest.c b/test/pingtest.c
+index 46ec60a..8607db6 100644
+--- a/test/pingtest.c
++++ b/test/pingtest.c
+@@ -24,7 +24,7 @@
+ #ifdef _WIN32
+ //#include <sys/select.h>
+ #include <winsock2.h>
+-int slirp_inet_aton(const char *cp, struct in_addr *ia)
++static int slirp_inet_aton(const char *cp, struct in_addr *ia)
+ {
+     uint32_t addr = inet_addr(cp);
+     if (addr == 0xffffffff) {
+-- 
+GitLab
+
