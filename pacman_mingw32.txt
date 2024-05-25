@@ -25,7 +25,6 @@ mingw-w64-i686-libgcrypt
 mingw-w64-i686-gnutls
 mingw-w64-i686-nettle
 mingw-w64-i686-curl
-mingw-w64-i686-7zip
 mingw-w64-i686-zstd
 mingw-w64-i686-meson
 mingw-w64-i686-gettext-runtime
