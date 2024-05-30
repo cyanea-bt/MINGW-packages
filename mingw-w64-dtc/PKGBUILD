@@ -1,0 +1,54 @@
+# Maintainer: Marc-André Lureau <marcandre.lureau@redhat.com>
+
+_realname=dtc
+pkgbase=mingw-w64-${_realname}
+pkgname="${MINGW_PACKAGE_PREFIX}-${_realname}"
+pkgver=1.7.0
+pkgrel=1
+pkgdesc="Device Tree Compiler"
+arch=('any')
+mingw_arch=('mingw32' 'mingw64' 'ucrt64' 'clang64' 'clangarm64')
+url="https://git.kernel.org/pub/scm/utils/dtc/dtc.git/"
+msys2_references=(
+  "cpe: cpe:2.3:a:dtc_project:dtc"
+)
+license=('spdx:GPL-2.0-or-later')
+depends=("${MINGW_PACKAGE_PREFIX}-libyaml")
+makedepends=("${MINGW_PACKAGE_PREFIX}-cc"
+             "${MINGW_PACKAGE_PREFIX}-meson"
+             "${MINGW_PACKAGE_PREFIX}-ninja"
+             "${MINGW_PACKAGE_PREFIX}-python"
+             "${MINGW_PACKAGE_PREFIX}-python-setuptools"
+             "${MINGW_PACKAGE_PREFIX}-python-setuptools-scm"
+             "${MINGW_PACKAGE_PREFIX}-swig")
+source=("https://git.kernel.org/pub/scm/utils/dtc/dtc.git/snapshot/${_realname}-${pkgver}.tar.gz"
+        "0001-meson-disable-tests.patch")
+sha256sums=('70d9c156ec86d63de0f7bdae50540ffa492b25ec1d69491c7520845c860b9a62'
+            '59c3ebea9cf6e930814678b071f53233ad475e43cad9281c38c69c9035cd9437')
+
+prepare() {
+  cd "${srcdir}"/${_realname}-${pkgver}
+  patch -p1 -i "${srcdir}/0001-meson-disable-tests.patch"
+}
+
+build() {
+  mkdir -p build-${MSYSTEM} && cd build-${MSYSTEM}
+
+  export SETUPTOOLS_SCM_PRETEND_VERSION=${pkgver}
+
+  MSYS2_ARG_CONV_EXCL="--prefix=" \
+  ${MINGW_PREFIX}/bin/meson setup \
+    --prefix="${MINGW_PREFIX}" \
+    -Dtools=true \
+    ../${_realname}-${pkgver}
+
+  ${MINGW_PREFIX}/bin/meson compile
+}
+
+package() {
+  cd "${srcdir}/build-${MSYSTEM}"
+
+  DESTDIR="${pkgdir}" ${MINGW_PREFIX}/bin/meson install
+
+  install -Dm644 "${srcdir}/${_realname}-${pkgver}"/GPL "${pkgdir}${MINGW_PREFIX}"/share/licenses/${_realname}/GPL
+}

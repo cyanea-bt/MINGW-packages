@@ -1,0 +1,88 @@
+diff --git a/build/build_mingw.ninja.template b/build/build_mingw.ninja.template
+new file mode 100644
+index 00000000..27339a7f
+--- /dev/null
++++ b/build/build_mingw.ninja.template
+@@ -0,0 +1,13 @@
++rule cxx
++  command = $cxx -MMD -MF $out.d $includes $cflags -c $in -o $out
++  description = CXX $out
++  depfile = $out.d
++  deps = gcc
++
++rule alink_thin
++  command = $ar rcsT $out $in
++  description = AR $out
++
++rule link
++  command = $ld $ldflags -o $out -Wl,--start-group $in $libs -Wl,--end-group $solibs
++  description = LINK $out
+diff --git a/build/gen.py b/build/gen.py
+index 9168035b..0b6468ab 100755
+--- a/build/gen.py
++++ b/build/gen.py
+@@ -40,7 +40,10 @@ class Platform(object):
+     elif self._platform.startswith('msys'):
+       self._platform = 'msys'
+     elif self._platform.startswith('win'):
+-      self._platform = 'msvc'
++      if 'MSC' in sys.version:
++        self._platform = 'msvc'
++      else:
++        self._platform = 'mingw'
+     elif self._platform.startswith('aix'):
+       self._platform = 'aix'
+     elif self._platform.startswith('fuchsia'):
+@@ -298,7 +301,7 @@ def WriteGenericNinja(path, static_libraries, executables,
+ 
+   template_filename = os.path.join(SCRIPT_DIR, {
+       'msvc': 'build_win.ninja.template',
+-      'mingw': 'build_linux.ninja.template',
++      'mingw': 'build_mingw.ninja.template',
+       'msys': 'build_linux.ninja.template',
+       'darwin': 'build_mac.ninja.template',
+       'linux': 'build_linux.ninja.template',
+@@ -315,10 +318,14 @@ def WriteGenericNinja(path, static_libraries, executables,
+   with open(template_filename) as f:
+     ninja_template = f.read()
+ 
+-  if platform.is_windows():
++  if platform.is_msvc():
+     executable_ext = '.exe'
+     library_ext = '.lib'
+     object_ext = '.obj'
++  elif platform.is_mingw():
++    executable_ext = '.exe'
++    library_ext = '.a'
++    object_ext = '.obj'
+   else:
+     executable_ext = ''
+     library_ext = '.a'
+@@ -394,10 +401,18 @@ def WriteGNNinja(path, platform, host, options, args_list):
+     cxx = os.environ.get('CXX', 'g++')
+     ld = os.environ.get('LD', 'g++')
+     ar = os.environ.get('AR', 'ar -X64')
+-  elif platform.is_msys() or platform.is_mingw():
++  elif platform.is_msys():
+     cxx = os.environ.get('CXX', 'g++')
+     ld = os.environ.get('LD', 'g++')
+     ar = os.environ.get('AR', 'ar')
++  elif platform.is_mingw():
++    if 'Clang' in sys.version:
++      cxx = os.environ.get('CXX', 'clang++')
++      ld = os.environ.get('LD', 'clang++')
++    else:
++      cxx = os.environ.get('CXX', 'g++')
++      ld = os.environ.get('LD', 'g++')
++    ar = os.environ.get('AR', 'ar')
+   else:
+     cxx = os.environ.get('CXX', 'clang++')
+     ld = cxx
+@@ -507,6 +522,7 @@ def WriteGNNinja(path, platform, host, options, args_list):
+ 
+       if platform.is_mingw() or platform.is_msys():
+         cflags.remove('-std=c++20')
++        cflags.remove('-pthread')
+         cflags.extend([
+           '-Wno-deprecated-copy',
+           '-Wno-implicit-fallthrough',
