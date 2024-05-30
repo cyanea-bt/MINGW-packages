@@ -60,3 +60,6 @@ mingw-w64-i686-vala
 mingw-w64-i686-texinfo
 mingw-w64-i686-rust
 mingw-w64-i686-cargo-c
+mingw-w64-i686-doxygen
+mingw-w64-i686-graphviz
+mingw-w64-i686-python-graphviz

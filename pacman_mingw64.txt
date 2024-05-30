@@ -64,3 +64,6 @@ mingw-w64-x86_64-spice-gtk
 mingw-w64-x86_64-texinfo
 mingw-w64-x86_64-rust
 mingw-w64-x86_64-cargo-c
+mingw-w64-x86_64-doxygen
+mingw-w64-x86_64-graphviz
+mingw-w64-x86_64-python-graphviz
