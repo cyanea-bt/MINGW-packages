@@ -3,8 +3,8 @@
 _realname=libu2f-emu
 pkgbase=mingw-w64-${_realname}
 pkgname=("${MINGW_PACKAGE_PREFIX}-${_realname}")
-pkgver=c378502
-pkgrel=1
+pkgver=5b737a8
+pkgrel=2
 pkgdesc="Universal 2nd Factor (U2F) Emulation C Library"
 arch=('any')
 mingw_arch=('mingw32' 'mingw64' 'ucrt64')
@@ -20,7 +20,7 @@ makedepends=("${MINGW_PACKAGE_PREFIX}-cc"
              'git'
              'wget'
              'bsdtar')
-_commit='c378502e214959494cf8c5d3dd512f2a7c1c2d8f'
+_commit='5b737a86d57f1295f4d99d71a11037bfb3df1398'
 source=("${_realname}"::"git+https://github.com/cyanea-bt/${_realname}.git#commit=${_commit}") 
 sha256sums=('SKIP')
 
