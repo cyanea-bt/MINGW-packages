@@ -13,4 +13,3 @@ mpdecimal
 python
 p7zip
 cmake
-doxygen
