@@ -13,3 +13,4 @@ mpdecimal
 python
 p7zip
 cmake
+python-pytest
