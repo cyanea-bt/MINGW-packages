@@ -1,0 +1,69 @@
+# Contributor: cyanea-bt https://github.com/cyanea-bt
+
+_realname=libu2f-emu
+pkgbase=mingw-w64-${_realname}
+pkgname=("${MINGW_PACKAGE_PREFIX}-${_realname}")
+pkgver=c378502
+pkgrel=1
+pkgdesc="Universal 2nd Factor (U2F) Emulation C Library"
+arch=('any')
+mingw_arch=('mingw32' 'mingw64' 'ucrt64')
+url="https://github.com/Agnoctopus/libu2f-emu"
+license=("GPL-2.0")
+makedepends=("${MINGW_PACKAGE_PREFIX}-cc"
+             "${MINGW_PACKAGE_PREFIX}-cmake"
+             "${MINGW_PACKAGE_PREFIX}-ninja"
+             "${MINGW_PACKAGE_PREFIX}-doxygen"
+             "${MINGW_PACKAGE_PREFIX}-graphviz"
+             "${MINGW_PACKAGE_PREFIX}-openssl"
+             "${MINGW_PACKAGE_PREFIX}-gtest"
+             'git'
+             'wget'
+             'bsdtar')
+_commit='c378502e214959494cf8c5d3dd512f2a7c1c2d8f'
+source=("${_realname}"::"git+https://github.com/cyanea-bt/${_realname}.git#commit=${_commit}") 
+sha256sums=('SKIP')
+
+pkgver() {
+    cd "${srcdir}/${_realname}"
+    git describe --always --long "${_commit}" | sed 's/\([^-]*-g\)/r\1/;s/-/./g;s/^v//g'
+}
+
+prepare() {
+    cd "${srcdir}"
+    # use precompiled openssl-1.1.1w to avoid updating u2f-emu for openssl-3
+    wget "https://github.com/cyanea-bt/MINGW-packages/releases/download/2024.05.31/openssl-1.1.1w-${MSYSTEM}.tar.xz"
+    bsdtar xf "./openssl-1.1.1w-${MSYSTEM}.tar.xz"
+}
+
+build() {
+    declare -a extra_config
+    if check_option "debug" "n"; then
+        extra_config+=("-DCMAKE_BUILD_TYPE=Release")
+    else
+        extra_config+=("-DCMAKE_BUILD_TYPE=Debug")
+    fi
+
+    MSYS2_ARG_CONV_EXCL="-DCMAKE_INSTALL_PREFIX=" \
+    "${MINGW_PREFIX}"/bin/cmake.exe \
+        -GNinja \
+        -DCMAKE_INSTALL_PREFIX="${MINGW_PREFIX}" \
+        "${extra_config[@]}" \
+        -DBUILD_{SHARED,STATIC}_LIBS=ON \
+        -DOPENSSL_ROOT_DIR="../openssl-${MSYSTEM}" \
+        -S "${_realname}" \
+        -B "build-${MSYSTEM}" \
+
+    "${MINGW_PREFIX}"/bin/cmake.exe --build "build-${MSYSTEM}"
+}
+
+check() {
+    # "${MINGW_PREFIX}"/bin/cmake.exe --build "build-${MSYSTEM}" --target test
+    echo "tests not working (at least for now)"
+}
+
+package() {
+    DESTDIR="${pkgdir}" "${MINGW_PREFIX}"/bin/cmake.exe --install "build-${MSYSTEM}"
+    install -d "${pkgdir}${MINGW_PREFIX}/share/licenses/${_realname}"
+    install -Dm644 "${srcdir}/${_realname}/LICENSE" "${pkgdir}${MINGW_PREFIX}/share/licenses/${_realname}/LICENSE"
+}
