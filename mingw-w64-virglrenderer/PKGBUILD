@@ -1,0 +1,80 @@
+# Courtesy of qemu-3dfx <liewkj@yahoo.com>
+
+_realname=virglrenderer
+pkgbase=mingw-w64-${_realname}
+pkgname=${MINGW_PACKAGE_PREFIX}-${_realname}
+pkgver=1.0.1
+pkgrel=1
+pkgdesc='A virtual 3D GPU library, that allows the guest operating system to use the host GPU to accelerate 3D rendering (mingw-w64)'
+arch=('any')
+mingw_arch=('mingw32' 'mingw64' 'ucrt64' 'clang64' 'clangarm64')
+url='https://docs.mesa3d.org/drivers/virgl/'
+msys2_repository_url="https://gitlab.freedesktop.org/virgl/virglrenderer"
+msys2_references=(
+  'archlinux: virglrenderer'
+  "cpe: cpe:/a:virglrenderer_project:virglrenderer"
+)
+license=(spdx:MIT)
+depends=("${MINGW_PACKAGE_PREFIX}-gcc-libs"
+         "${MINGW_PACKAGE_PREFIX}-libepoxy"
+         "${MINGW_PACKAGE_PREFIX}-libwinpthread-git")
+makedepends=("${MINGW_PACKAGE_PREFIX}-cc"
+             "${MINGW_PACKAGE_PREFIX}-meson"
+             "${MINGW_PACKAGE_PREFIX}-pkgconf"
+             "${MINGW_PACKAGE_PREFIX}-ninja")
+source=("https://gitlab.freedesktop.org/virgl/${_realname}/-/archive/${pkgver}/${_realname}-${pkgver}.tar.bz2"
+        "https://raw.githubusercontent.com/kjliew/qemu-3dfx/aafe2f3e/virgil3d/MINGW-packages/0001-Virglrenderer-on-Windows-and-macOS.patch"
+        "vrend_debug_cb.patch")
+sha256sums=('53cb8fadd08f5260ee57833fc2488565481438bc7a8e34f3e114d12cc9d9db9a'
+            '80f83e1f171600991df54d10dce704a77a8609ad34b23b904568cbf86ea339bf'
+            'eac6d43835fcb576e724ca3df267702a11dd883cf0ce5917e36735da70b465ea')
+
+noextract=("${_realname}-${pkgver}.tar.bz2")
+
+prepare() {
+  echo "Extracting ${_realname}-${pkgver}.tar.bz2 ..."
+  tar -xjf "${srcdir}/${_realname}-${pkgver}.tar.bz2" || true
+
+  cd "${srcdir}/${_realname}-${pkgver}"
+  # https://gitlab.freedesktop.org/virgl/virglrenderer/-/issues/217
+  patch -p2 -i "${srcdir}/0001-Virglrenderer-on-Windows-and-macOS.patch"
+
+  if [[ "$MSYSTEM" == "MINGW32" ]] || [[ "$MSYSTEM" == "CLANG32" ]]
+  then
+    patch -p0 -i "${srcdir}/vrend_debug_cb.patch"
+  fi
+}
+
+build() {
+  mkdir -p build-${MSYSTEM} && cd build-${MSYSTEM}
+
+  declare -a _extra_config
+  if check_option "debug" "n"; then
+    _extra_config+=("--buildtype=release")
+  else
+    _extra_config+=("--buildtype=debug")
+  fi
+
+  CFLAGS+=" -mno-ms-bitfields"
+  MSYS2_ARG_CONV_EXCL="--prefix" \
+  ${MINGW_PREFIX}/bin/meson setup \
+    --prefix="${MINGW_PREFIX}" \
+    "${_extra_config[@]}" \
+    --wrap-mode=nodownload \
+    ../${_realname}-${pkgver}
+
+  ${MINGW_PREFIX}/bin/meson compile
+}
+
+check() {
+  cd build-${MSYSTEM}
+  ${MINGW_PREFIX}/bin/meson test || true
+}
+
+package() {
+  cd build-${MSYSTEM}
+
+  DESTDIR="$pkgdir" ${MINGW_PREFIX}/bin/meson install
+
+  install -D -m644 "${srcdir}"/${_realname}-${pkgver}/COPYING "${pkgdir}"/${MINGW_PREFIX}/share/licenses/${_realname}/COPYING
+}

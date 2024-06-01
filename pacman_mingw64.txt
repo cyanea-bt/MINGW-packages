@@ -67,3 +67,5 @@ mingw-w64-x86_64-rust
 mingw-w64-x86_64-cargo-c
 mingw-w64-x86_64-python-pytest
 mingw-w64-x86_64-python-mingw-ldd
+mingw-w64-x86_64-utf8cpp
+mingw-w64-x86_64-gst-plugin-gtk

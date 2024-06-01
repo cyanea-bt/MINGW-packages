@@ -7,7 +7,6 @@ mingw-w64-i686-SDL2
 mingw-w64-i686-SDL2_sound
 mingw-w64-i686-SDL2_image
 mingw-w64-i686-libnfs
-mingw-w64-i686-virglrenderer
 mingw-w64-i686-rtmidi
 mingw-w64-i686-ncurses
 mingw-w64-i686-cyrus-sasl
@@ -39,7 +38,6 @@ mingw-w64-i686-portaudio
 mingw-w64-i686-lz4
 mingw-w64-i686-libcacard
 mingw-w64-i686-snappy
-mingw-w64-i686-spice-protocol
 mingw-w64-i686-iconv
 mingw-w64-i686-libiconv
 mingw-w64-i686-libtasn1
