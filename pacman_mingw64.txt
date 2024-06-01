@@ -45,6 +45,7 @@ mingw-w64-x86_64-spice-protocol
 mingw-w64-x86_64-spice
 mingw-w64-x86_64-gst-libav
 mingw-w64-x86_64-gst-plugins-good
+mingw-w64-x86_64-gst-plugins-ugly
 mingw-w64-x86_64-iconv
 mingw-w64-x86_64-libiconv
 mingw-w64-x86_64-libtasn1
