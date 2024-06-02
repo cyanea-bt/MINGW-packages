@@ -7,6 +7,13 @@
 dir_here=$(realpath -s "./")
 dir_orig=$(realpath -s "../MINGW-packages-orig")
 
+# ref: https://stackoverflow.com/a/33206814, https://en.wikipedia.org/wiki/ANSI_escape_code
+clear_line='\033[2K'
+normal='\033[0m'
+bold='\033[1m'
+italic='\033[3m'
+reverse='\033[7m'
+
 if [[ ! -d "${dir_here}" ]]; then
     echo "${dir_here} is not a directory!"
     exit 1
@@ -41,7 +48,7 @@ do
     fi
     
     if  [[ $date_orig_unix -gt $date_here_unix ]]; then
-        echo "new version: ${dir}"
+        echo -e "new version: ${bold}${dir}${normal}"
         echo "orig: ${date_orig_iso} > here: ${date_here_iso}"
         if [[ ! -z $date_here_unix ]]; then
             git log --since="${date_here_unix}" --pretty="format:%C(yellow)%h %C(cyan)%cs%Creset %s" "${dir}"
@@ -51,7 +58,7 @@ do
         echo ""
     else
         # ref: https://unix.stackexchange.com/a/26592
-        echo -e -n "\033[2Kup-to-date: ${dir}\r"
+        echo -e -n "${clear_line}up-to-date: ${dir}\r"
         # echo "orig: ${date_orig_iso} <= here: ${date_here_iso}"
     fi
 
@@ -61,4 +68,4 @@ do
     date_orig_iso=""
 done
 
-echo -e "\033[2KDONE"
+echo -e "${clear_line}${reverse}${bold}ALL DONE${normal}"
