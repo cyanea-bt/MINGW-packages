@@ -1,7 +1,13 @@
 *.tar.xz
 *.tar.gz
 *.tar.bz2
+
+# ignore built pkgs unless they're in export dirs
 *.tar.zst
+!/mingw32/**/*.zst
+!/mingw64/**/*.zst
+!/ucrt64/**/*.zst
+
 *.tar.lz
 *.tar.lzma
 *.tar
