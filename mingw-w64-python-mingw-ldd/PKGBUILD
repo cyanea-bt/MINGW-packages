@@ -16,7 +16,7 @@ license=('spdx:MIT')
 depends=("${MINGW_PACKAGE_PREFIX}-python-pefile")
 makedepends=("${MINGW_PACKAGE_PREFIX}-python-setuptools")
 source=("${url}/archive/v${pkgver}/${_realname}-${pkgver}.tar.gz")
-sha256sums=('4eb58c1fe218e5278bc95a530bf8c38797376b0f3c5d008cd79d82df58b5347a')
+sha256sums=('98e35c123f5f49e3de70e8128dc5b56cc9a359df73cf1757bc62b972ad2e98ed')
 
 prepare() {
   rm -rf python-build-${MSYSTEM} || true
