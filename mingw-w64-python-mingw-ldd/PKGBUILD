@@ -3,12 +3,12 @@
 _realname=mingw-ldd
 pkgbase=mingw-w64-python-${_realname}
 pkgname=("${MINGW_PACKAGE_PREFIX}-python-${_realname}")
-pkgver=0.2.1
-pkgrel=3
+pkgver=0.2.2
+pkgrel=1
 pkgdesc="Lists dependencies of a PE (exe/dll) file (mingw-w64)"
 arch=('any')
 mingw_arch=('mingw32' 'mingw64' 'ucrt64' 'clang64' 'clangarm64')
-url='https://github.com/nurupo/mingw-ldd'
+url='https://github.com/cyanea-bt/mingw-ldd'
 msys2_references=(
   'pypi: mingw-ldd'
 )
@@ -16,7 +16,7 @@ license=('spdx:MIT')
 depends=("${MINGW_PACKAGE_PREFIX}-python-pefile")
 makedepends=("${MINGW_PACKAGE_PREFIX}-python-setuptools")
 source=("${url}/archive/v${pkgver}/${_realname}-${pkgver}.tar.gz")
-sha256sums=('60d34506d2f345e011b88de172ef312f37ca3ba87f3764f511061b69878ab204')
+sha256sums=('4eb58c1fe218e5278bc95a530bf8c38797376b0f3c5d008cd79d82df58b5347a')
 
 prepare() {
   rm -rf python-build-${MSYSTEM} || true

@@ -48,7 +48,7 @@ do
     fi
     
     if  [[ $date_orig_unix -gt $date_here_unix ]]; then
-        echo -e "new version: ${bold}${dir}${normal}"
+        echo -e "${clear_line}new version: ${bold}${dir}${normal}"
         echo "orig: ${date_orig_iso} > here: ${date_here_iso}"
         if [[ ! -z $date_here_unix ]]; then
             git log --since="${date_here_unix}" --pretty="format:%C(yellow)%h %C(cyan)%cs%Creset %s" "${dir}"
