@@ -1,27 +1,21 @@
-# Contributor: Mehdi Chinoune <mehdi.chinoune@hotmail.com>
+# Contributor: cyanea-bt https://github.com/cyanea-bt
 
-_realname=mingw-ldd
+_realname=filehash
 pkgbase=mingw-w64-python-${_realname}
 pkgname=("${MINGW_PACKAGE_PREFIX}-python-${_realname}")
-pkgver=0.2.2
+pkgver=0.3
 pkgrel=1
-pkgdesc="Lists dependencies of a PE (exe/dll) file (mingw-w64)"
+pkgdesc="Python module that wraps around hashlib and zlib to facilitate generating checksums/hashes of files and directories. (mingw-w64)"
 arch=('any')
 mingw_arch=('mingw32' 'mingw64' 'ucrt64' 'clang64' 'clangarm64')
-url='https://github.com/cyanea-bt/mingw-ldd'
+url='https://github.com/cyanea-bt/filehash'
 msys2_references=(
-  'pypi: mingw-ldd'
+  'pypi: filehash'
 )
 license=('spdx:MIT')
-depends=("${MINGW_PACKAGE_PREFIX}-python"
-         "${MINGW_PACKAGE_PREFIX}-python-pefile"
-         "${MINGW_PACKAGE_PREFIX}-python-filehash"
-         "${MINGW_PACKAGE_PREFIX}-python-sqlitedict"
-         "${MINGW_PACKAGE_PREFIX}-python-dill"
-         "${MINGW_PACKAGE_PREFIX}-python-platformdirs")
 makedepends=("${MINGW_PACKAGE_PREFIX}-python-setuptools")
 source=("${url}/archive/v${pkgver}/${_realname}-${pkgver}.tar.gz")
-sha256sums=('271ea9152c53894d5764cd3c4348ad0ebe8e1373cb39b1e78064da24992b9d15')
+sha256sums=('b7528a622b463e9bfef56a3f2680eb4aa7727645d29164a20ff77993e85a8b33')
 
 prepare() {
   rm -rf python-build-${MSYSTEM} || true
