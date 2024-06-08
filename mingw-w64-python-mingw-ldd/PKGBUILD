@@ -1,4 +1,4 @@
-# Contributor: Mehdi Chinoune <mehdi.chinoune@hotmail.com>
+# Contributor: cyanea-bt https://github.com/cyanea-bt
 
 _realname=mingw-ldd
 pkgbase=mingw-w64-python-${_realname}
