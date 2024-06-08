@@ -3,12 +3,13 @@
 _realname=pefile
 pkgbase=mingw-w64-python-${_realname}
 pkgname=("${MINGW_PACKAGE_PREFIX}-python-${_realname}")
-pkgver=80535f5
+pkgver=2024.4.22
 pkgrel=1
 pkgdesc="Python PE parsing module (mingw-w64)"
 arch=('any')
 mingw_arch=('mingw32' 'mingw64' 'ucrt64' 'clang64' 'clangarm64')
-url='https://github.com/erocarrera/pefile'
+_repository='erocarrera/pefile'
+url="https://github.com/${_repository}"
 msys2_references=(
   'pypi: pefile'
 )
@@ -19,41 +20,27 @@ makedepends=("${MINGW_PACKAGE_PREFIX}-python-build"
              "${MINGW_PACKAGE_PREFIX}-python-installer"
              "${MINGW_PACKAGE_PREFIX}-python-setuptools"
              "${MINGW_PACKAGE_PREFIX}-python-setuptools-scm"
-             "${MINGW_PACKAGE_PREFIX}-python-wheel")
+             "${MINGW_PACKAGE_PREFIX}-python-wheel"
+             "${MINGW_PACKAGE_PREFIX}-curl"
+             "${MINGW_PACKAGE_PREFIX}-jq")
 _commit='80535f51f024805066c6ccfa062cd21d1a7afba5'
 # source=("${_realname}"::"git+https://github.com/erocarrera/${_realname}.git#commit=${_commit}") 
-# source=("${url}/archive/${_commit}.tar.gz")
-# sha256sums=('SKIP')
+source=("${url}/archive/${_commit}.tar.gz")
+sha256sums=('SKIP')
 
 pkgver() {
-    # cd "${srcdir}/${_realname}"
-    # git describe --always --long "${_commit}" | sed 's/\([^-]*-g\)/r\1/;s/-/./g;s/^v//g'
-
-    # ref: https://unix.stackexchange.com/a/481879
-    # echo "${_commit:0:7}"
-
-    cd "python-build-${MSYSTEM}"
-    git describe --always --long "${_commit}" | sed 's/\([^-]*-g\)/r\1/;s/-/./g;s/^v//g'
+  # fetch date from github api, ref: https://stackoverflow.com/a/28973585
+  api_response=$(curl -s "https://api.github.com/repos/${_repository}/commits/${_commit}")
+  date_api=$(jq -br '.commit.committer.date' <<<"${api_response}")
+  date_commit=$(date -d "${date_api}" "+%Y.%-m.%-d")
+  echo "${date_commit}"
 }
 
 prepare() {
-  # rm -rf python-build-${MSYSTEM} || true
+  rm -rf python-build-${MSYSTEM} || true  
   # cp -r "${_realname}-${_commit}" "python-build-${MSYSTEM}"
-
-  rm -rf python-build-${MSYSTEM} || true
-
-  if [[ -d "../${_realname}" ]]; then
-    cd "../${_realname}"
-    # updating shallow clone, ref: https://stackoverflow.com/a/41081908
-    git fetch --depth 1
-    git reset --hard origin/master
-    git clean -dfx
-    cd "${srcdir}"
-  else
-    git clone --depth=1 "${url}" "../${_realname}"
-  fi
-  
-  cp -r "../${_realname}" "python-build-${MSYSTEM}"
+  mv "${_realname}-${_commit}" "python-build-${MSYSTEM}"
+  rm "${_commit}.tar.gz"
 }
 
 build() {
@@ -62,10 +49,8 @@ build() {
   cd "${srcdir}/python-build-${MSYSTEM}"
 
   # update version string in pefile.py
-  unix_commit=$(git log -1 --format=%ct ${_commit})
-  date_commit=$(date -d @${unix_commit} "+%Y.%m.%d")
   # ref: https://stackoverflow.com/a/11145362, https://stackoverflow.com/a/8822213
-  sedcmd='s/^__version__ = .*/__version__ = "'${date_commit}'"/'
+  sedcmd='s/^__version__ = .*/__version__ = "'${pkgver}'"/'
   sed -i "${sedcmd}" pefile.py
 
   ${MINGW_PREFIX}/bin/python -m build --wheel --skip-dependency-check --no-isolation
