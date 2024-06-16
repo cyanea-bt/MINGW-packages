@@ -1,0 +1,72 @@
+# Contributor: cyanea-bt https://github.com/cyanea-bt
+
+_realname=gitpython
+pkgbase=mingw-w64-python-${_realname}
+pkgname=("${MINGW_PACKAGE_PREFIX}-python-${_realname}")
+pkgver=2024.6.8
+pkgrel=1
+pkgdesc="GitPython is a python library used to interact with Git repositories. (mingw-w64)"
+arch=('any')
+mingw_arch=('mingw32' 'mingw64' 'ucrt64' 'clang64' 'clangarm64')
+_repository='gitpython-developers/GitPython'
+url="https://github.com/${_repository}"
+msys2_references=(
+  'pypi: gitpython'
+)
+license=('BSD-3-Clause')
+depends=("${MINGW_PACKAGE_PREFIX}-python"
+         "${MINGW_PACKAGE_PREFIX}-python-typing_extensions"
+         "${MINGW_PACKAGE_PREFIX}-python-gitdb")
+makedepends=("${MINGW_PACKAGE_PREFIX}-python-build"
+             "${MINGW_PACKAGE_PREFIX}-python-installer"
+             "${MINGW_PACKAGE_PREFIX}-python-setuptools"
+             "${MINGW_PACKAGE_PREFIX}-python-setuptools-scm"
+             "${MINGW_PACKAGE_PREFIX}-python-wheel"
+             "${MINGW_PACKAGE_PREFIX}-curl"
+             "${MINGW_PACKAGE_PREFIX}-jq")
+_commit='ee987dac1c7456c9bda7bd62e8ac2952da38e31e'
+source=("${url}/archive/${_commit}.tar.gz")
+sha256sums=('SKIP')
+
+pkgver() {
+  # fetch date from github api, ref: https://stackoverflow.com/a/28973585
+  api_response=$(curl -s "https://api.github.com/repos/${_repository}/commits/${_commit}")
+  date_api=$(jq -br '.commit.committer.date' <<<"${api_response}")
+  date_commit=$(date -d "${date_api}" "+%Y.%-m.%-d")
+  echo "${date_commit}"
+}
+
+prepare() {
+  rm -rf python-build-${MSYSTEM} || true  
+  # cp -r "${_realname}-${_commit}" "python-build-${MSYSTEM}"
+  mv "${_realname}-${_commit}" "python-build-${MSYSTEM}"
+  rm "${_commit}.tar.gz"
+}
+
+build() {
+  # Set version for setuptools_scm
+  export SETUPTOOLS_SCM_PRETEND_VERSION=${pkgver}
+  cd "${srcdir}/python-build-${MSYSTEM}"
+
+  # update version string in setup.py
+  # ref: https://stackoverflow.com/a/11145362, https://stackoverflow.com/a/8822213
+  sedcmd='s/^version = .*/version = "'${pkgver}'"/'
+  sed -i "${sedcmd}" setup.py
+
+  ${MINGW_PREFIX}/bin/python -m build --wheel --skip-dependency-check --no-isolation
+}
+
+check() {
+  # cd "${srcdir}/python-build-${MSYSTEM}"
+  # ${MINGW_PREFIX}/bin/python -m pytest || warning "Tests failed"
+  echo "no tests for now"
+}
+
+package() {
+  cd "${srcdir}/python-build-${MSYSTEM}"
+  MSYS2_ARG_CONV_EXCL="--prefix=" \
+    ${MINGW_PREFIX}/bin/python -m installer --prefix=${MINGW_PREFIX} \
+    --destdir="${pkgdir}" dist/*.whl
+
+  install -Dm644 LICENSE "${pkgdir}${MINGW_PREFIX}/share/licenses/python-${_realname}/LICENSE"
+}

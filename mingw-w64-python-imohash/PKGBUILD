@@ -1,0 +1,65 @@
+# Contributor: cyanea-bt https://github.com/cyanea-bt
+
+_realname=imohash
+pkgbase=mingw-w64-python-${_realname}
+pkgname=("${MINGW_PACKAGE_PREFIX}-python-${_realname}")
+pkgver=2024.2.25
+pkgrel=1
+pkgdesc="Fast hashing for large files (mingw-w64)"
+arch=('any')
+mingw_arch=('mingw32' 'mingw64' 'ucrt64' 'clang64' 'clangarm64')
+_repository='kalafut/py-imohash'
+url="https://github.com/${_repository}"
+msys2_references=(
+  'pypi: imohash'
+)
+license=('spdx:MIT')
+depends=("${MINGW_PACKAGE_PREFIX}-python"
+         "${MINGW_PACKAGE_PREFIX}-python-mmh3"
+         "${MINGW_PACKAGE_PREFIX}-python-varint")
+makedepends=("${MINGW_PACKAGE_PREFIX}-python-setuptools")
+_commit='415b8e97299fa398c956112ae8299fbd89a9f08e'
+source=("${url}/archive/${_commit}.tar.gz")
+sha256sums=('SKIP')
+
+pkgver() {
+  # fetch date from github api, ref: https://stackoverflow.com/a/28973585
+  api_response=$(curl -s "https://api.github.com/repos/${_repository}/commits/${_commit}")
+  date_api=$(jq -br '.commit.committer.date' <<<"${api_response}")
+  date_commit=$(date -d "${date_api}" "+%Y.%-m.%-d")
+  echo "${date_commit}"
+}
+
+prepare() {
+  rm -rf python-build-${MSYSTEM} || true  
+  # cp -r "${_realname}-${_commit}" "python-build-${MSYSTEM}"
+  mv "py-${_realname}-${_commit}" "python-build-${MSYSTEM}"
+  rm "${_commit}.tar.gz"
+}
+
+build() {
+  # Set version for setuptools_scm
+  export SETUPTOOLS_SCM_PRETEND_VERSION=${pkgver}
+  cd "${srcdir}/python-build-${MSYSTEM}"
+
+  # update version string in setup.py
+  # ref: https://stackoverflow.com/a/11145362, https://stackoverflow.com/a/8822213
+  sedcmd='s/^    version=.*/    version="'${pkgver}'",/'
+  sed -i "${sedcmd}" setup.py
+
+  ${MINGW_PREFIX}/bin/python setup.py build
+}
+
+check() {
+  cd "${srcdir}/python-build-${MSYSTEM}"
+  ${MINGW_PREFIX}/bin/python setup.py check
+}
+
+package() {
+  cd "${srcdir}/python-build-${MSYSTEM}"
+  MSYS2_ARG_CONV_EXCL="--prefix=;--install-scripts=;--install-platlib=" \
+  ${MINGW_PREFIX}/bin/python setup.py install --prefix=${MINGW_PREFIX} \
+    --root="${pkgdir}" --optimize=1 --skip-build
+
+  install -Dm644 LICENSE "${pkgdir}${MINGW_PREFIX}/share/licenses/python-${_realname}/LICENSE"
+}

@@ -1,27 +1,27 @@
 # Contributor: cyanea-bt https://github.com/cyanea-bt
 
-_realname=mingw-ldd
+_realname=atomics
 pkgbase=mingw-w64-python-${_realname}
 pkgname=("${MINGW_PACKAGE_PREFIX}-python-${_realname}")
-pkgver=0.2.2
+pkgver=1.0.2
 pkgrel=1
-pkgdesc="Lists dependencies of a PE (exe/dll) file (mingw-w64)"
+pkgdesc="Lock-Free Atomics in Python (mingw-w64)"
 arch=('any')
 mingw_arch=('mingw32' 'mingw64' 'ucrt64' 'clang64' 'clangarm64')
-url='https://github.com/cyanea-bt/mingw-ldd'
+url='https://github.com/doodspav/atomics'
 msys2_references=(
-  'pypi: mingw-ldd'
+  'pypi: atomics'
 )
-license=('spdx:MIT')
+license=('GPL-3.0')
 depends=("${MINGW_PACKAGE_PREFIX}-python"
-         "${MINGW_PACKAGE_PREFIX}-python-pefile")
-optdepends=("${MINGW_PACKAGE_PREFIX}-python-sqlitedict"
-            "${MINGW_PACKAGE_PREFIX}-python-dill"
-            "${MINGW_PACKAGE_PREFIX}-python-platformdirs"
-            "${MINGW_PACKAGE_PREFIX}-python-imohash")
-makedepends=("${MINGW_PACKAGE_PREFIX}-python-setuptools")
+         "${MINGW_PACKAGE_PREFIX}-python-cffi")
+makedepends=("${MINGW_PACKAGE_PREFIX}-python-setuptools"
+             "${MINGW_PACKAGE_PREFIX}-python-gitpython"
+             "${MINGW_PACKAGE_PREFIX}-cmake"
+             "${MINGW_PACKAGE_PREFIX}-ninja"
+             "${MINGW_PACKAGE_PREFIX}-cc")
 source=("${url}/archive/v${pkgver}/${_realname}-${pkgver}.tar.gz")
-sha256sums=('271ea9152c53894d5764cd3c4348ad0ebe8e1373cb39b1e78064da24992b9d15')
+sha256sums=('db8441957d8a1991610f0787b2543623c32046045bc522ec9f899d5ad143655b')
 
 prepare() {
   rm -rf python-build-${MSYSTEM} || true
@@ -47,10 +47,5 @@ package() {
   ${MINGW_PREFIX}/bin/python setup.py install --prefix=${MINGW_PREFIX} \
     --root="${pkgdir}" --optimize=1 --skip-build
 
-  install -Dm644 LICENSE "${pkgdir}${MINGW_PREFIX}/share/licenses/python-${_realname}/LICENSE"
-
-  # remove shebang line
-  for _f in "${pkgdir}${MINGW_PREFIX}"/bin/*-script.py; do
-    sed -e '1 { s/^#!.*$// }' -i ${_f}
-  done
+  install -Dm644 LICENSE.txt "${pkgdir}${MINGW_PREFIX}/share/licenses/python-${_realname}/LICENSE.txt"
 }
